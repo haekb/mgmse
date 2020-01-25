@@ -160,7 +160,7 @@ class ListingController extends CommonController
 
         // Some games don't pass over the hostip, so default to the server trying to talk to us!
         // TODO: Why can't I just use serverAddress :thinking:
-        $hostAddress = Arr::get($query, 'hostip', $serverAddress) . ':' . Arr::get($query, 'hostport');
+        $hostAddress = $serverAddress;//Arr::get($query, 'hostip', $serverAddress) . ':' . Arr::get($query, 'hostport');
 
         try {
             $server = (new Server())->findInCache($hostAddress);

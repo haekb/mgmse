@@ -67,13 +67,13 @@ class Server extends Model
      * Cache $this model!
      * @return bool
      */
-    public function cache() : bool
+    public function cache(): bool
     {
         if (!$this->address) {
             throw new \RuntimeException('Address field is required in order to cache the server model.');
         }
 
-        return (bool)\RedisManager::zadd($this->getCacheKey(), time(), json_encode($this->toArray()));
+        return (bool) \RedisManager::zadd($this->getCacheKey(), time(), json_encode($this->toArray()));
     }
 
     /**
@@ -88,7 +88,7 @@ class Server extends Model
 
         $servers = [];
 
-        foreach($results as $result) {
+        foreach ($results as $result) {
             try {
                 $server = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
             } catch (\ErrorException $e) {
@@ -111,22 +111,22 @@ class Server extends Model
     public function findInCache($address): Server
     {
         $servers = $this->findAllInCache();
-        $cache = null;
+        $cache   = null;
 
-        foreach($servers as $server) {
+        foreach ($servers as $server) {
             try {
                 $decoded_server = json_decode($server, true, 512, JSON_THROW_ON_ERROR);
             } catch (\ErrorException $e) {
                 continue;
             }
 
-            if(\Arr::get($decoded_server, 'address') === $address) {
+            if (\Arr::get($decoded_server, 'address') === $address) {
                 $cache = $decoded_server;
                 break;
             }
         }
 
-        if(!$cache) {
+        if (!$cache) {
             throw new \RuntimeException("Could not find server {$address} in cache.");
         }
 
@@ -144,38 +144,35 @@ class Server extends Model
      */
     public function updateInCache($address, $options): bool
     {
-        $servers = $this->findAllInCache();
-        $cache = null;
+        $servers     = $this->findAllInCache();
+        $cache       = null;
         $serverIndex = -1;
 
-        foreach($servers as $index => $server) {
+        foreach ($servers as $index => $server) {
             try {
                 $decoded_server = json_decode($server, true, 512, JSON_THROW_ON_ERROR);
             } catch (\ErrorException $e) {
                 continue;
             }
 
-            if(\Arr::get($decoded_server, 'address') === $address) {
-                $cache = $decoded_server;
+            if (\Arr::get($decoded_server, 'address') === $address) {
+                $cache       = $decoded_server;
                 $serverIndex = $index;
                 break;
             }
         }
 
-        if(!$cache) {
-            //throw new \RuntimeException("Could not find server {$address} in cache.");
-        }
-
         // Fill this model instance
         $this->fill($options);
 
-        // Remove the old entry
-        \RedisManager::zremRangeByRank($this->getCacheKey(), $serverIndex, $serverIndex);
-
+        if ($cache) {
+            // Remove the old entry
+            \RedisManager::zremRangeByRank($this->getCacheKey(), $serverIndex, $serverIndex);
+        }
         return $this->cache();
     }
 
-    public function getCacheTTL() : int
+    public function getCacheTTL(): int
     {
         return self::CACHE_TTL;
     }
@@ -184,7 +181,7 @@ class Server extends Model
     {
         $key = self::CACHE_KEY;
 
-        if(\App::runningUnitTests()) {
+        if (\App::runningUnitTests()) {
             $key .= '.testing';
         }
 
