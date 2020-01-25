@@ -35,11 +35,8 @@ class Server extends Model
     public const STATUS_OPEN   = 'openplaying';
     public const STATUS_CLOSED = 'exiting';
 
-    public const CACHE_MAP_KEY = 'models.servers.map';
-    public const CACHE_KEY = 'models.servers';
-    public const CACHE_TTL = 5; // Minutes
-
-    public const CACHE_LOCK = 'server.lock';
+    private const CACHE_KEY = 'models.servers';
+    private const CACHE_TTL = 5; // Minutes
 
     /**
      * The attributes that are mass assignable.
@@ -76,7 +73,7 @@ class Server extends Model
             throw new \RuntimeException('Address field is required in order to cache the server model.');
         }
 
-        return (bool)\RedisManager::zadd($this::CACHE_KEY, time(), $this->toArray());
+        return (bool)\RedisManager::zadd($this->getCacheKey(), time(), $this->toJson());
     }
 
     /**
@@ -87,7 +84,22 @@ class Server extends Model
      */
     public function findAllInCache($min = 0, $max = 1000): Collection
     {
-        $results = \RedisManager::zrange($this::CACHE_KEY, $min, $max);
+        $results = \RedisManager::zrange($this->getCacheKey(), $min, $max);
+
+        $servers = [];
+
+        foreach($results as $result) {
+            try {
+                $server = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\JsonException $e) {
+                continue;
+            }
+
+            $servers[] = $server;
+        }
+
+        $results = self::hydrate($servers);
+
         return collect($results);
     }
 
@@ -102,8 +114,14 @@ class Server extends Model
         $cache = null;
 
         foreach($servers as $server) {
-            if($server->address === $address) {
-                $cache = $server;
+            try {
+                $decoded_server = json_decode($server, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\JsonException $e) {
+                continue;
+            }
+
+            if($decoded_server->address === $address) {
+                $cache = $decoded_server;
                 break;
             }
         }
@@ -116,5 +134,21 @@ class Server extends Model
         $this->fill($cache);
 
         return $this;
+    }
+
+    public function getCacheTTL() : int
+    {
+        return self::CACHE_TTL;
+    }
+
+    public function getCacheKey(): string
+    {
+        $key = self::CACHE_KEY;
+
+        if(\App::runningUnitTests()) {
+            $key .= '.testing';
+        }
+
+        return $key;
     }
 }

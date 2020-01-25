@@ -9,6 +9,15 @@ use Tests\Unit\Socket\Stubs\ConnectionStub;
 
 class QueryControllerTest extends TestCase
 {
+    public function setUp() : void
+    {
+        parent::setUp();
+
+        // Before each test, clear the test cache!
+        $cache_key = (new Server())->getCacheKey();
+        \RedisManager::del($cache_key);
+    }
+
     /**
      * @dataProvider provideEmptyQueries
      * @param $query
@@ -29,7 +38,7 @@ class QueryControllerTest extends TestCase
 
     public function testOnDataReturnsData(): void
     {
-        $query = '\\gamename\\nolf2\\gamever\\1.3\\location\\0\\validate\\g3Fo6x\\final\\';
+        $query = '\\gamename\\nolf2\\gamever\\1.3\\location\\0\\validate\\g3Fo6x\\final\\list\\\\gamename\\nolf2';
 
         $server = Server::create([
             'name'        => 'Test Server',
@@ -38,7 +47,7 @@ class QueryControllerTest extends TestCase
             'game_name'    => 'nolf2',
             'game_version' => '1.3.3.7',
             'status'      => Server::STATUS_OPEN,
-        ])->save();
+        ])->cache();
 
         $connection = new ConnectionStub();
         $this->assertEmpty($connection->getData());
@@ -53,6 +62,7 @@ class QueryControllerTest extends TestCase
         // Good enough for now.
         // This returns a binary string, which I can't figure out how to decode yet...unpack doesn't like me.
         $this->assertNotEmpty($data);
+        $this->assertNotEquals("\\basic\\\\secure\\TXKOAT\\final\\", $data);
 
     }
 

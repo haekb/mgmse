@@ -44,8 +44,8 @@ class CleanUpExpiredServers extends Command
      */
     public function handle()
     {
-        $cache_key = Server::CACHE_KEY;
-        $cache_ttl = Server::CACHE_TTL;
+        $cache_key = (new Server())->getCacheKey();
+        $cache_ttl = (new Server())->getCacheTTL();
         $expire_time = now()->subMinutes($cache_ttl)->timestamp;
 
         $removed = \RedisManager::zremrangebyscore($cache_key, '-inf', $expire_time);
