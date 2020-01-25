@@ -60,7 +60,7 @@ class QueryControllerTest extends TestCase
         // Good enough for now.
         // This returns a binary string, which I can't figure out how to decode yet...unpack doesn't like me.
         $this->assertNotEmpty($data);
-        $this->assertNotEquals("\\basic\\\\secure\\TXKOAT\\final\\", $data);
+        $this->assertNotEquals("\\final\\", $data);
 
     }
 

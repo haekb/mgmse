@@ -100,8 +100,10 @@ class QueryController extends CommonController
             }
         }
 
-        $security = '';//"\\secure\\TXKOAT";
-        $response = $security.$response."\\final\\";
+        if ($response !== '') {
+            $security = '';//"\\secure\\TXKOAT";
+            $response = $security.$response."\\final\\";
+        }
 
         Log::info("Sent client {$this->connection->getRemoteAddress()}: {$response}");
 
@@ -113,7 +115,7 @@ class QueryController extends CommonController
     {
         try {
             $encoded_query = json_encode($query, JSON_THROW_ON_ERROR, 512);
-        } catch (\JsonException $exception) {
+        } catch (\ErrorException $exception) {
             \Log::warning('[QueryController::onData] Could not json encode query! Data will be invalid.');
             $encoded_query = '! COULD NOT ENCODE !';
         }

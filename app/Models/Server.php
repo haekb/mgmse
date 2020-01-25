@@ -60,7 +60,7 @@ class Server extends Model
      */
     protected $casts = [
         'has_password' => 'boolean',
-        'options'      => 'json',
+        'options'      => 'array',
     ];
 
     /**
@@ -95,11 +95,18 @@ class Server extends Model
                 continue;
             }
 
+            // BUG: For some reason Laravel isn't casting our array to json on a later ->toArray()
+            // So do it here.
+            try {
+                $server['options'] = json_encode($server['options'], JSON_THROW_ON_ERROR, 512);
+            } catch (\ErrorException $e) {
+                $server['options'] = '[]';
+            }
+
             $servers[] = $server;
         }
 
         $results = self::hydrate($servers);
-
         return collect($results);
     }
 
@@ -111,17 +118,12 @@ class Server extends Model
     public function findInCache($address): Server
     {
         $servers = $this->findAllInCache();
+
         $cache   = null;
 
         foreach ($servers as $server) {
-            try {
-                $decoded_server = json_decode($server, true, 512, JSON_THROW_ON_ERROR);
-            } catch (\ErrorException $e) {
-                continue;
-            }
-
-            if (\Arr::get($decoded_server, 'address') === $address) {
-                $cache = $decoded_server;
+            if ($server->address === $address) {
+                $cache = $server;
                 break;
             }
         }
@@ -131,7 +133,7 @@ class Server extends Model
         }
 
         // Fill this model instance
-        $this->fill($cache);
+        $this->fill($cache->toArray());
 
         return $this;
     }
@@ -169,6 +171,7 @@ class Server extends Model
             // Remove the old entry
             \RedisManager::zremRangeByRank($this->getCacheKey(), $serverIndex, $serverIndex);
         }
+
         return $this->cache();
     }
 

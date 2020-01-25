@@ -7,6 +7,11 @@ use React\Socket\ConnectionInterface;
 use React\Stream\WritableStreamInterface;
 use React\Stream\Util;
 
+/**
+ * TCP Connection Stub
+ * Class ConnectionStub
+ * @package Tests\Unit\Socket\Stubs
+ */
 class ConnectionStub extends EventEmitter implements ConnectionInterface
 {
     private $data = '';

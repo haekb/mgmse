@@ -7,8 +7,8 @@ use Arr;
 use Config;
 use Exception;
 use Log;
-use React\Socket\ConnectionInterface;
 use \React\Datagram\Socket;
+use React\Datagram\SocketInterface;
 
 class ListingController extends CommonController
 {
@@ -17,9 +17,9 @@ class ListingController extends CommonController
         'currentQueryID' => '0.0',
     ];
 
-    protected Socket $connection;
+    protected SocketInterface $connection;
 
-    public function __construct(Socket $connection)
+    public function __construct(SocketInterface $connection)
     {
         $this->connection = $connection;
     }
@@ -63,12 +63,13 @@ class ListingController extends CommonController
     /**
      * On data get! Handle any data incoming here
      * @param  string  $message
+     * @param  string  $serverAddress
      */
     public function onData(string $message, $serverAddress): void
     {
         Log::info("Received data from client {$serverAddress}: {$message}");
 
-        $queries = $this->messageToArray($message);
+        $queries  = $this->messageToArray($message);
         $response = '';
 
         foreach ($queries as $query) {
@@ -101,8 +102,8 @@ class ListingController extends CommonController
 
     protected function handleHeartbeat($query, $serverAddress): string
     {
-        $stateChanged = \Arr::get($query, 'stateChanged', false);
-        $response = '';
+        $stateChanged = (bool)\Arr::has($query, 'statechanged');
+        $response     = '';
 
         try {
             $server = (new Server())->findInCache($serverAddress);
@@ -117,7 +118,7 @@ class ListingController extends CommonController
         }
 
         // If we don't have a server by them, or if something changed on their end, mark it down that we need to poke them
-        if(!$server || $stateChanged) {
+        if (!$server || $stateChanged) {
 
             $response .= '\\status\\';
 
@@ -169,33 +170,33 @@ class ListingController extends CommonController
         }
 
         //if(!$server) {
-            $exclude_for_options = [
-                'hostname',
-                'hostip',
-                'hostport',
-                'password',
-                'gamename',
-                'gamever',
-                'gamemode'
-            ];
+        $exclude_for_options = [
+            'hostname',
+            'hostip',
+            'hostport',
+            'password',
+            'gamename',
+            'gamever',
+            'gamemode',
+        ];
 
-            $server = new Server();
-            $server->name = Arr::get($query, 'hostname');
-            $server->address = $hostAddress;
+        $server          = new Server();
+        $server->name    = Arr::get($query, 'hostname');
+        $server->address = $hostAddress;
 
-            $server->has_password = (bool)Arr::get($query, 'password', 0);
-            $server->game_name = Arr::get($query, 'gamename');
-            $server->game_version = Arr::get($query, 'gamever');
+        $server->has_password = (bool) Arr::get($query, 'password', 0);
+        $server->game_name    = Arr::get($query, 'gamename');
+        $server->game_version = Arr::get($query, 'gamever');
 
-            $options = array_filter($query, function($item) use ($exclude_for_options) {
-                return !in_array($item, $exclude_for_options, true);
-            });
+        $options = array_filter($query, function ($item) use ($exclude_for_options) {
+            return !in_array($item, $exclude_for_options, true);
+        });
 
-            $server->options = $options;
+        $server->options = $options;
 
-            $serverArray = $server->toArray();
+        $serverArray = $server->toArray();
 
-            return $server->updateInCache($hostAddress, $serverArray);
+        return $server->updateInCache($hostAddress, $serverArray);
         //}
 
     }

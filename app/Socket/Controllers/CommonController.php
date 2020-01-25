@@ -48,7 +48,7 @@ abstract class CommonController
 
         // Bad query, but let's try to roll with it!
         if ($queryId === null) {
-            \Log::warning("[CommonController::messageToArray] No query id in query! Assigning 1.1. Data: {$message}");
+            //\Log::warning("[CommonController::messageToArray] No query id in query! Assigning 1.1. Data: {$message}");
             $queryId = '1.1';
         }
 
