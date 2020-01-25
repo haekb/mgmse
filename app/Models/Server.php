@@ -73,7 +73,7 @@ class Server extends Model
             throw new \RuntimeException('Address field is required in order to cache the server model.');
         }
 
-        return (bool)\RedisManager::zadd($this->getCacheKey(), time(), $this->toJson());
+        return (bool)\RedisManager::zadd($this->getCacheKey(), time(), json_encode($this->toArray()));
     }
 
     /**
@@ -91,7 +91,7 @@ class Server extends Model
         foreach($results as $result) {
             try {
                 $server = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
-            } catch (\JsonException $e) {
+            } catch (\ErrorException $e) {
                 continue;
             }
 
@@ -116,11 +116,11 @@ class Server extends Model
         foreach($servers as $server) {
             try {
                 $decoded_server = json_decode($server, true, 512, JSON_THROW_ON_ERROR);
-            } catch (\JsonException $e) {
+            } catch (\ErrorException $e) {
                 continue;
             }
 
-            if($decoded_server->address === $address) {
+            if(\Arr::get($decoded_server, 'address') === $address) {
                 $cache = $decoded_server;
                 break;
             }
@@ -134,6 +134,45 @@ class Server extends Model
         $this->fill($cache);
 
         return $this;
+    }
+
+    /**
+     * TODO: I'm probably real slow!
+     * @param $address
+     * @param $options
+     * @return bool
+     */
+    public function updateInCache($address, $options): bool
+    {
+        $servers = $this->findAllInCache();
+        $cache = null;
+        $serverIndex = -1;
+
+        foreach($servers as $index => $server) {
+            try {
+                $decoded_server = json_decode($server, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\ErrorException $e) {
+                continue;
+            }
+
+            if(\Arr::get($decoded_server, 'address') === $address) {
+                $cache = $decoded_server;
+                $serverIndex = $index;
+                break;
+            }
+        }
+
+        if(!$cache) {
+            //throw new \RuntimeException("Could not find server {$address} in cache.");
+        }
+
+        // Fill this model instance
+        $this->fill($options);
+
+        // Remove the old entry
+        \RedisManager::zremRangeByRank($this->getCacheKey(), $serverIndex, $serverIndex);
+
+        return $this->cache();
     }
 
     public function getCacheTTL() : int

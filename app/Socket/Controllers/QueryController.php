@@ -100,10 +100,10 @@ class QueryController extends CommonController
             }
         }
 
-        $security = "\\basic\\\\secure\\TXKOAT";
+        $security = '';//"\\secure\\TXKOAT";
         $response = $security.$response."\\final\\";
 
-        Log::info("Sent client {$this->connection->getRemoteAddress()}");//: {$response}");
+        Log::info("Sent client {$this->connection->getRemoteAddress()}: {$response}");
 
         $sent = $this->connection->write($response);
         $this->connection->end();

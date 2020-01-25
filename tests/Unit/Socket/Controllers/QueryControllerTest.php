@@ -24,8 +24,6 @@ class QueryControllerTest extends TestCase
      */
     public function testOnDataReturnsEmpty($query): void
     {
-
-        \Log::info('hello');
         $connection = new ConnectionStub();
         $this->assertEmpty($connection->getData());
 
