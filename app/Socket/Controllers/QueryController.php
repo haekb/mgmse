@@ -111,7 +111,7 @@ class QueryController extends CommonController
         $this->connection->end();
     }
 
-    public function handleIdentify($query): bool
+    protected function handleIdentify($query): bool
     {
         try {
             $encoded_query = json_encode($query, JSON_THROW_ON_ERROR, 512);
@@ -136,7 +136,7 @@ class QueryController extends CommonController
         return true;
     }
 
-    public function handleList($query, $response)
+    protected function handleList($query, $response)
     {
         $gameName = Arr::get($query, 'gamename');
         $servers = (new Server())->findAllInCache($gameName);
@@ -151,7 +151,7 @@ class QueryController extends CommonController
         return $response;
     }
 
-    public function handleQueryID($query) : void
+    protected function handleQueryID($query) : void
     {
         $queryIdRequest                 = Arr::last($query);
         $this->client['currentQueryID'] = Arr::get($queryIdRequest, 'queryid', '1.1');
