@@ -105,12 +105,15 @@ class ListingController extends CommonController
         $stateChanged = (bool)\Arr::has($query, 'statechanged');
         $response     = '';
 
+
+        $gameName = Arr::get($query, 'gamename');
+
         try {
-            $server = (new Server())->findInCache($serverAddress);
+            $server = (new Server())->findInCache($serverAddress, $gameName);
         } catch (\RuntimeException $e) {
             $server = null;
         }
-
+        
         // Update the time, and update the cache
         if ($server) {
             $server->setUpdatedAt(now());
@@ -119,7 +122,6 @@ class ListingController extends CommonController
 
         // If we don't have a server by them, or if something changed on their end, mark it down that we need to poke them
         if (!$server || $stateChanged) {
-
             $response .= '\\status\\';
 
             Log::info("Requested updated server info from {$serverAddress}");
@@ -130,41 +132,10 @@ class ListingController extends CommonController
 
     protected function handlePublish($query, $serverAddress): bool
     {
-        /*
-        \hostname\Jake
-         !        DM\gamename\nolf2\hostport\27888\gamemode\openplaying\gamever\1.0.0.4M\gametype\DeathMatch\hostip\192.168.1.1</>
-         !        frag_0\0\mapname\DD_02\maxplayers\16\numplayers\1\fraglimit\25\options\\password\0\timelimit\10\ping_0\0\playe
-         !        r_0\Jake\final\queryid\2.1
-         */
-        /*
-        [
-  "hostname" => "Jake DM"
-  "gamename" => "nolf2"
-  "hostport" => "27888"
-  "gamemode" => "openplaying"
-  "gamever" => "1.0.0.4M"
-  "gametype" => "DeathMatch"
-  "hostip" => "192.168.1.1"
-  "frag_0" => "0"
-  "mapname" => "DD_02"
-  "maxplayers" => "16"
-  "numplayers" => "1"
-  "fraglimit" => "25"
-  "options" => ""
-  "password" => "0"
-  "timelimit" => "10"
-  "ping_0" => "0"
-  "player_0" => "Jake"
-  "queryid" => "10.1"
-]
-*/
-
-        // Some games don't pass over the hostip, so default to the server trying to talk to us!
-        // TODO: Why can't I just use serverAddress :thinking:
-        $hostAddress = $serverAddress;//Arr::get($query, 'hostip', $serverAddress) . ':' . Arr::get($query, 'hostport');
+        $gameName = Arr::get($query, 'gamename');
 
         try {
-            $server = (new Server())->findInCache($hostAddress);
+            $server = (new Server())->findInCache($serverAddress, $gameName);
         } catch (\RuntimeException $e) {
             $server = null;
         }
@@ -182,7 +153,7 @@ class ListingController extends CommonController
 
         $server          = new Server();
         $server->name    = Arr::get($query, 'hostname');
-        $server->address = $hostAddress;
+        $server->address = $serverAddress;
 
         $server->has_password = (bool) Arr::get($query, 'password', 0);
         $server->game_name    = Arr::get($query, 'gamename');
@@ -196,7 +167,7 @@ class ListingController extends CommonController
 
         $serverArray = $server->toArray();
 
-        return $server->updateInCache($hostAddress, $serverArray);
+        return $server->updateInCache($serverAddress, $serverArray);
         //}
 
     }

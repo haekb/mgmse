@@ -15,7 +15,7 @@ class ListingControllerTest extends TestCase
         parent::setUp();
 
         // Before each test, clear the test cache!
-        $cache_key = (new Server())->getCacheKey();
+        $cache_key = (new Server())->getCacheKey() . '.nolf2';
         \RedisManager::del($cache_key);
     }
 
@@ -87,7 +87,7 @@ class ListingControllerTest extends TestCase
         $this->assertEmpty($socket->getData());
 
         // Use make so we don't store it in db.
-        $server = factory(Server::class)->make();
+        $server = factory(Server::class)->make(['game_name' => 'nolf2']);
         $server->cache();
 
         $listingServer = new ListingController($socket);
@@ -107,7 +107,7 @@ class ListingControllerTest extends TestCase
         $this->assertEmpty($socket->getData());
 
         // Use make so we don't store it in db.
-        $server = factory(Server::class)->make();
+        $server = factory(Server::class)->make(['game_name' => 'nolf2']);
         $server->cache();
 
         $listingController = new ListingController($socket);
@@ -131,6 +131,7 @@ class ListingControllerTest extends TestCase
         $listingServer = new ListingController($socket);
 
         $serverAddress = '192.168.1.1:27888';
+        $gameName = 'nolf2';
 
         $query = '\\hostname\\JakeDM\\gamename\\nolf2\\hostport\\27888\\gamemode\\openplaying\\gamever\\1.0.0.4M\\gametype\\DeathMatch\\hostip\\192.168.1.1\\frag_0\\0\\mapname\\DD_02\\maxplayers\\16\\numplayers\\1\\fraglimit\\25\\options\\\\password\\0\\timelimit\\10\\ping_0\\0\\player_0\\Jake\\final\\queryid\\2.1';
 
@@ -140,7 +141,7 @@ class ListingControllerTest extends TestCase
         // No response
         $this->assertEmpty($data);
 
-        $server = (new Server())->findInCache($serverAddress);
+        $server = (new Server())->findInCache($serverAddress, $gameName);
 
         $this->assertNotNull($server);
 

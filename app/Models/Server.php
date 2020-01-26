@@ -73,18 +73,19 @@ class Server extends Model
             throw new \RuntimeException('Address field is required in order to cache the server model.');
         }
 
-        return (bool) \RedisManager::zadd($this->getCacheKey(), time(), json_encode($this->toArray()));
+        return (bool) \RedisManager::zadd($this->getCacheKey(). ".{$this->game_name}", time(), json_encode($this->toArray()));
     }
 
     /**
      * Get all the cache!
-     * @param  int  $min
-     * @param  int  $max
+     * @param  string  $gameName Game Name
+     * @param  int     $min
+     * @param  int     $max
      * @return Collection
      */
-    public function findAllInCache($min = 0, $max = 1000): Collection
+    public function findAllInCache($gameName, $min = 0, $max = 1000): Collection
     {
-        $results = \RedisManager::zrange($this->getCacheKey(), $min, $max);
+        $results = \RedisManager::zrange($this->getCacheKey().".{$gameName}", $min, $max);
 
         $servers = [];
 
@@ -113,13 +114,14 @@ class Server extends Model
     /**
      * Slightly slow, we have to go through all the items in the cache to find out specific server..
      * @param $address
+     * @param $gameName
      * @return Server
      */
-    public function findInCache($address): Server
+    public function findInCache($address, $gameName): Server
     {
-        $servers = $this->findAllInCache();
+        $servers = $this->findAllInCache($gameName);
 
-        $cache   = null;
+        $cache = null;
 
         foreach ($servers as $server) {
             if ($server->address === $address) {
@@ -139,14 +141,15 @@ class Server extends Model
     }
 
     /**
-     * TODO: I'm probably real slow!
+     * FIXME: I'm probably real slow!
      * @param $address
      * @param $options
      * @return bool
      */
     public function updateInCache($address, $options): bool
     {
-        $servers     = $this->findAllInCache();
+        $gameName =  \Arr::get($options, 'game_name');
+        $servers     = $this->findAllInCache($gameName);
         $cache       = null;
         $serverIndex = -1;
 

@@ -138,7 +138,8 @@ class QueryController extends CommonController
 
     public function handleList($query, $response)
     {
-        $servers = (new Server())->findAllInCache();
+        $gameName = Arr::get($query, 'gamename');
+        $servers = (new Server())->findAllInCache($gameName);
 
         foreach($servers as $server) {
             $arr = explode(':', $server->address);

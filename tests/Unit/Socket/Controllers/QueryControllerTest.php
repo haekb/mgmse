@@ -14,7 +14,7 @@ class QueryControllerTest extends TestCase
         parent::setUp();
 
         // Before each test, clear the test cache!
-        $cache_key = (new Server())->getCacheKey();
+        $cache_key = (new Server())->getCacheKey() . '.nolf2';
         \RedisManager::del($cache_key);
     }
 
