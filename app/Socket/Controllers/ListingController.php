@@ -30,9 +30,6 @@ class ListingController extends CommonController
     public function onConnected(): void
     {
         Log::info("Client {$this->connection->getRemoteAddress()} connected");
-
-        // Ask for validation!
-        //$this->connection->send('\\secure\\');
     }
 
     /**
@@ -83,10 +80,10 @@ class ListingController extends CommonController
             }
         }
 
-        Log::info("Sent client {$this->connection->getRemoteAddress()}: {$response}");
 
-        $sent = $this->connection->send($response, $serverAddress);
-        /////
+        $this->connection->send($response, $serverAddress);
+
+        Log::info("Sent client {$this->connection->getRemoteAddress()}: {$response}");
     }
 
     protected function handleEcho($query, $serverAddress): string
@@ -96,7 +93,6 @@ class ListingController extends CommonController
         \Log::info("Client {$serverAddress} wanted to echo {$echo}");
 
         // According to https://www.oldunreal.com/UnrealReference/IpServer.htm echo is identical
-
         return "\\echo\\{$echo}";
     }
 
@@ -113,7 +109,7 @@ class ListingController extends CommonController
         } catch (\RuntimeException $e) {
             $server = null;
         }
-        
+
         // Update the time, and update the cache
         if ($server) {
             $server->setUpdatedAt(now());
@@ -140,7 +136,6 @@ class ListingController extends CommonController
             $server = null;
         }
 
-        //if(!$server) {
         $exclude_for_options = [
             'hostname',
             'hostip',
@@ -168,8 +163,6 @@ class ListingController extends CommonController
         $serverArray = $server->toArray();
 
         return $server->updateInCache($serverAddress, $serverArray);
-        //}
-
     }
 
 }
