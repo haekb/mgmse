@@ -73,12 +73,13 @@ class Server extends Model
             throw new \RuntimeException('Address field is required in order to cache the server model.');
         }
 
-        return (bool) \RedisManager::zadd($this->getCacheKey(). ".{$this->game_name}", time(), json_encode($this->toArray()));
+        return (bool) \RedisManager::zadd($this->getCacheKey().".{$this->game_name}", time(),
+            json_encode($this->toArray()));
     }
 
     /**
      * Get all the cache!
-     * @param  string  $gameName Game Name
+     * @param  string  $gameName  Game Name
      * @param  int     $min
      * @param  int     $max
      * @return Collection
@@ -148,7 +149,7 @@ class Server extends Model
      */
     public function updateInCache($address, $options): bool
     {
-        $gameName =  \Arr::get($options, 'game_name');
+        $gameName    = \Arr::get($options, 'game_name');
         $servers     = $this->findAllInCache($gameName);
         $cache       = null;
         $serverIndex = -1;
@@ -171,8 +172,19 @@ class Server extends Model
         $this->fill($options);
 
         if ($cache) {
+            $key = $this->getCacheKey().".{$gameName}";
+
             // Remove the old entry
-            \RedisManager::zremRangeByRank($this->getCacheKey(), $serverIndex, $serverIndex);
+            $itemsRemoved = \RedisManager::zremRangeByRank($key, $serverIndex, $serverIndex);
+
+            if ($itemsRemoved === 0) {
+                \Log::warning("[Server::updateInCache] Didn't remove any items for cache {$key}!");
+            }
+        } else {
+            // Cool new entry! Update our Game count!
+            $game = Game::where('game_name', '=', $gameName)->firstOrCreate(['game_name' => $gameName]);
+            $game->server_count++;
+            $game->save();
         }
 
         return $this->cache();

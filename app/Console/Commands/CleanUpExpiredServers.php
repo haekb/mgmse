@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Game;
 use App\Models\Server;
 use Illuminate\Console\Command;
 
@@ -44,14 +45,23 @@ class CleanUpExpiredServers extends Command
      */
     public function handle()
     {
-        $cache_key = (new Server())->getCacheKey();
-        $cache_ttl = (new Server())->getCacheTTL();
-        $expire_time = now()->subMinutes($cache_ttl)->timestamp;
+        $games = Game::where('server_count', '>', 0)->get();
 
-        $removed = \RedisManager::zremrangebyscore($cache_key, '-inf', $expire_time);
+        foreach ($games as $game) {
+            $cache_key   = (new Server())->getCacheKey().".{$game}";
+            $cache_ttl   = (new Server())->getCacheTTL();
+            $expire_time = now()->subMinutes($cache_ttl)->timestamp;
 
-        if($removed > 0) {
-            \Log::info("[CleanUpExpiredServers::handle] Removed {$removed} expired servers.");
+            $removed = \RedisManager::zremrangebyscore($cache_key, '-inf', $expire_time);
+
+            if ($removed > 0) {
+                \Log::info("[CleanUpExpiredServers::handle] Removed {$removed} expired servers.");
+
+                // Ok modify the server count with the amount we removed!
+                $game->server_count -= $removed;
+                $game->save();
+            }
+
         }
     }
 }

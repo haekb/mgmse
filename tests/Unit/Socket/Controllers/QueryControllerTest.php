@@ -4,6 +4,7 @@ namespace Tests\Unit\Socket\Controllers;
 
 use App\Models\Server;
 use App\Socket\Controllers\QueryController;
+use Faker\Generator;
 use Tests\TestCase;
 use Tests\Unit\Socket\Stubs\ConnectionStub;
 
@@ -62,6 +63,30 @@ class QueryControllerTest extends TestCase
         $this->assertNotEmpty($data);
         $this->assertNotEquals("\\final\\", $data);
 
+    }
+
+    public function testLotsOfServersReturnProperly(): void
+    {
+        $faker = app(Generator::class);
+
+        for($i = 0; $i < 1000; $i++) {
+            $server = Server::create([
+                'name'         => $faker->bs,
+                'address'      => '127.0.0.1:' . $faker->unique()->numberBetween(100, 10000),
+                'has_password' => false,
+                'game_name'    => 'nolf2',
+                'game_version' => '1.3.3.7',
+                'status'       => Server::STATUS_OPEN,
+            ])->cache();
+        }
+
+        $connection = new ConnectionStub();
+        $this->assertEmpty($connection->getData());
+
+        $gameName = 'nolf2';
+        $servers = (new Server())->findAllInCache($gameName);
+
+        $this->assertCount(1000, $servers);
     }
 
     /**
