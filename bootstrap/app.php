@@ -26,10 +26,15 @@ $app = new Illuminate\Foundation\Application(
 |
 */
 
+//
+// Jake: We don't need the HTTP kernel for this project!
+//
+/*
 $app->singleton(
     Illuminate\Contracts\Http\Kernel::class,
     App\Http\Kernel::class
 );
+*/
 
 $app->singleton(
     Illuminate\Contracts\Console\Kernel::class,

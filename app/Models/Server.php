@@ -83,7 +83,7 @@ class Server extends Model
      * @param  int     $max
      * @return Collection
      */
-    public function findAllInCache($gameName, $min = 0, $max = 1000): Collection
+    public function findAllInCache($gameName, $min = 0, $max = 10000): Collection
     {
         $results = \RedisManager::zrange($this->getCacheKey().".{$gameName}", $min, $max);
 
