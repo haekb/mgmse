@@ -39,4 +39,5 @@ class Game extends Model
 
         return parent::save($options);
     }
+
 }

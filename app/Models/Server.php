@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -16,6 +17,8 @@ use Illuminate\Support\Collection;
  * @property string  $game_name
  * @property string  $game_version
  * @property string  $status
+ * @property Carbon  $created_at
+ * @property Carbon  $updated_at
  * @package App\Models
  * @mixin Eloquent
  */
@@ -51,6 +54,8 @@ class Server extends Model
         'game_name',
         'game_version',
         'status',
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -73,7 +78,7 @@ class Server extends Model
             throw new \RuntimeException('Address field is required in order to cache the server model.');
         }
 
-        return (bool) \RedisManager::zadd($this->getCacheKey().".{$this->game_name}", time(),
+        return (bool) \RedisManager::zadd($this->getCacheKey().".{$this->game_name}", $this->updated_at->timestamp,
             json_encode($this->toArray()));
     }
 
@@ -166,6 +171,14 @@ class Server extends Model
                 $serverIndex = $index;
                 break;
             }
+        }
+
+        if (!isset($options['created_at'])) {
+            $options['created_at'] = Carbon::now();
+        }
+
+        if (!isset($options['updated_at'])) {
+            $options['updated_at'] = Carbon::now();
         }
 
         // Fill this model instance

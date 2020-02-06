@@ -48,7 +48,7 @@ class CleanUpExpiredServers extends Command
         $games = Game::where('server_count', '>', 0)->get();
 
         foreach ($games as $game) {
-            $cache_key   = (new Server())->getCacheKey().".{$game}";
+            $cache_key   = (new Server())->getCacheKey().".{$game->game_name}";
             $cache_ttl   = (new Server())->getCacheTTL();
             $expire_time = now()->subMinutes($cache_ttl)->timestamp;
 
@@ -61,7 +61,8 @@ class CleanUpExpiredServers extends Command
                 $game->server_count -= $removed;
                 $game->save();
             }
-
         }
+
+        return 0;
     }
 }
