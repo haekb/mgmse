@@ -49,7 +49,7 @@ class QueryController extends CommonController
      */
     public function onError(Exception $e): void
     {
-        Log::info("Client recieved error {$e->getMessage()}");
+        Log::info("Client received error {$e->getMessage()}");
     }
 
     /**
@@ -108,7 +108,6 @@ class QueryController extends CommonController
         Log::info("Sent client {$this->connection->getRemoteAddress()}: {$response}");
 
         $sent = $this->connection->write($response);
-        $this->connection->end();
     }
 
     protected function handleIdentify($query): bool
