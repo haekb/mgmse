@@ -37,10 +37,10 @@ class QueryController extends CommonController
      */
     public function onConnected(): void
     {
-        Log::info("Client {$this->connection->getRemoteAddress()} connected");
+        Log::info("Client {$this->connection->getRemoteAddress()} connected. Sending initial request.");
 
         // Ask for validation!
-        $this->connection->write('\\secure\\');
+        $this->connection->write('\\basic\\\\secure\\final\\');
     }
 
     /**
@@ -97,7 +97,7 @@ class QueryController extends CommonController
                 }
 
             } elseif (isset($query['list'])) {
-                $response .= $this->handleList($query, $response);
+                $response   .= $this->handleList($query, $response);
                 $forceFinal = true;
             } elseif (isset($query['queryid'])) {
                 $this->handleQueryID($query);
@@ -125,7 +125,7 @@ class QueryController extends CommonController
 
         // Not used right now!
         $validates = Config::get('games.keys', []);
-        $gameKey  = Arr::get($query, 'validate');
+        $gameKey   = Arr::get($query, 'validate');
 
         // Validate the request - For now just validate that they pass something. Not really worth it to decode this stuff.
         if (!$this->client['valid'] && !$gameKey) {
@@ -139,12 +139,40 @@ class QueryController extends CommonController
         return true;
     }
 
-    protected function handleList($query, $response)
+    /**
+     * Unreal Engine expects a response like
+     * \\ip\\127.0.0.1:1234\\127.0.0.1:1235\\final\\
+     * @param $query
+     * @param $response
+     * @return string
+     */
+    protected function handleListUnreal($query, $response)
     {
         $gameName = Arr::get($query, 'gamename');
-        $servers = (new Server())->findAllInCache($gameName);
+        $servers  = (new Server())->findAllInCache($gameName);
 
-        foreach($servers as $server) {
+        $response .= '\\ip\\';
+
+        foreach ($servers as $server) {
+            $response .= $server->address;
+            $response .= '\\';
+        }
+
+        return $response;
+    }
+
+    /**
+     * Lithtech expects a packed response
+     * @param $query
+     * @param $response
+     * @return string
+     */
+    protected function handleListLithtech($query, $response)
+    {
+        $gameName = Arr::get($query, 'gamename');
+        $servers  = (new Server())->findAllInCache($gameName);
+
+        foreach ($servers as $server) {
             $arr = explode(':', $server->address);
             // Shove the ip address in, and make the port big endian
             $processed_server = [$this->packIP($arr[0]), pack('n', $arr[1])];
@@ -154,7 +182,27 @@ class QueryController extends CommonController
         return $response;
     }
 
-    protected function handleQueryID($query) : void
+    /**
+     * @param $query
+     * @param $response
+     * @return string
+     */
+    protected function handleList($query, $response)
+    {
+        $gameName = Arr::get($query, 'gamename');
+
+        // Handle different versions of this request!
+        switch ($gameName) {
+            default:
+            case 'nolf':
+            case 'nolf2':
+                return $this->handleListLithtech($query, $response);
+            case 'deusex':
+                return $this->handleListUnreal($query, $response);
+        }
+    }
+
+    protected function handleQueryID($query): void
     {
         $queryIdRequest                 = Arr::last($query);
         $this->client['currentQueryID'] = Arr::get($queryIdRequest, 'queryid', '1.1');

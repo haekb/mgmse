@@ -12,6 +12,7 @@ return [
     // Currently supported games. Any attempt at creating games that aren't under this will fail!
     'supported_games' => [
         'nolf',
-        'nolf2'
+        'nolf2',
+        'deusex',
     ]
 ];

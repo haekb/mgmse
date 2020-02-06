@@ -80,10 +80,13 @@ class ListingController extends CommonController
             }
         }
 
+        if ($response !== '') {
+            $response .= '\\final\\';
+        }
 
         $this->connection->send($response, $serverAddress);
 
-        Log::info("Sent client {$this->connection->getRemoteAddress()}: {$response}");
+        Log::info("Sent client {$serverAddress}: {$response}");
     }
 
     protected function handleEcho($query, $serverAddress): string
@@ -98,7 +101,7 @@ class ListingController extends CommonController
 
     protected function handleHeartbeat($query, $serverAddress): string
     {
-        $stateChanged = (bool)\Arr::has($query, 'statechanged');
+        $stateChanged = (bool) \Arr::has($query, 'statechanged');
         $response     = '';
 
 
@@ -118,9 +121,21 @@ class ListingController extends CommonController
 
         // If we don't have a server by them, or if something changed on their end, mark it down that we need to poke them
         if (!$server || $stateChanged) {
+            // Ask for more info!
             $response .= '\\status\\';
 
             Log::info("Requested updated server info from {$serverAddress}");
+
+            // Not all games support \\status\\ request directly from the master server (lol, Unreal Engine 1 games)
+            // So use the info we've got to mark the game server down.
+            $publishQuery = [
+                'hostname' => 'Not Available',
+                'gamename' => Arr::get($query, 'gamename'),
+                'gamever'  => '1.0',
+                'password' => 0,
+            ];
+
+            $this->handlePublish($publishQuery, $serverAddress);
         }
 
         return $response;
