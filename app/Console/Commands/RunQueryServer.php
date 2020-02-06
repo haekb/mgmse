@@ -15,7 +15,7 @@ class RunQueryServer extends Command
      *
      * @var string
      */
-    protected $signature = 'run:query-server {--port=28900}';
+    protected $signature = 'run:query-server {--address=127.0.0.1} {--port=28900}';
 
     /**
      * The console command description.
@@ -44,11 +44,12 @@ class RunQueryServer extends Command
         // Ports
         // 28900 - GameSpy v1 (NOLF 1)
         // 28910 - GameSpy v2? (Contract Jack)
+        $address = $this->option('address');
         $port = $this->option('port');
 
         $loop = Factory::create();
 
-        $socket = new Server("127.0.0.1:{$port}", $loop, ['tcp' => ['so_reuseport' => true]]);
+        $socket = new Server("{$address}:{$port}", $loop, ['tcp' => ['so_reuseport' => true]]);
 
         $socket->on('connection', function (\React\Socket\ConnectionInterface $connection) {
 

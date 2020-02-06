@@ -16,7 +16,7 @@ class RunListingServer extends Command
      *
      * @var string
      */
-    protected $signature = 'run:listing-server {--port=27900}';
+    protected $signature = 'run:listing-server {--address=127.0.0.1} {--port=27900}';
 
     /**
      * The console command description.
@@ -42,12 +42,13 @@ class RunListingServer extends Command
      */
     public function handle()
     {
+        $address = $this->option('address');
         $port = $this->option('port');
 
         $loop = Factory::create();
         $factory = new UDPFactory($loop);
 
-        $factory->createServer("127.0.0.1:{$port}")->then(function (Socket $server) {
+        $factory->createServer("{$address}:{$port}")->then(function (Socket $server) {
 
             $publishingServer = new ListingController($server);
 
