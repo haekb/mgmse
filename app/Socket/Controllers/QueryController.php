@@ -82,6 +82,9 @@ class QueryController extends CommonController
 
         $response = '';
 
+        // For some responses, we always want to include the final!
+        $forceFinal = false;
+
         foreach ($queries as $query) {
             // Handle individual queries here!
             if (isset($query['validate'])) {
@@ -95,12 +98,13 @@ class QueryController extends CommonController
 
             } elseif (isset($query['list'])) {
                 $response .= $this->handleList($query, $response);
+                $forceFinal = true;
             } elseif (isset($query['queryid'])) {
                 $this->handleQueryID($query);
             }
         }
 
-        if ($response !== '') {
+        if ($response !== '' || $forceFinal) {
             $security = '';//"\\secure\\TXKOAT";
             $response = $security.$response."\\final\\";
         }
