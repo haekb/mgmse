@@ -26,5 +26,7 @@ $factory->define(Server::class, function (Faker $faker) {
         'game_version' => '1.3.3.7',
         'status'       => Server::STATUS_OPEN,
         'options'      => '[]',
+        'created_at'   => \Carbon\Carbon::now(),
+        'updated_at'   => \Carbon\Carbon::now(),
     ];
 });

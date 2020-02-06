@@ -69,8 +69,13 @@ class RunQueryServer extends Command
                 $masterServer->onClosed();
             });
 
-            $connection->on('data', function ($message) use ($masterServer) {
-                $masterServer->onData($message);
+            $connection->on('data', function ($message) use ($masterServer, $connection) {
+                try {
+                    $masterServer->onData($message);
+                } catch (Exception $e) {
+                    // Close connections that cause uncaught exceptions
+                    $connection->close();
+                }
             });
         });
 

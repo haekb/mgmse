@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Socket\Controllers\ListingController;
+use Exception;
 use Illuminate\Console\Command;
 use \React\EventLoop\Factory;
 use \React\Datagram\Factory as UDPFactory;
@@ -69,7 +70,11 @@ class RunListingServer extends Command
             });
 
             $server->on('message', function($message, $serverAddress, $server) use ($publishingServer) {
-                $publishingServer->onData($message, $serverAddress);
+                try {
+                    $publishingServer->onData($message, $serverAddress);
+                } catch (Exception $e) {
+                    // Ignore uncaught exceptions for UDP.
+                }
             });
         });
 
