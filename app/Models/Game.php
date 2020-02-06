@@ -27,7 +27,8 @@ class Game extends Model
 
     public function save(array $options = [])
     {
-        $wantedGame = \Arr::get($options, 'game_name');
+        $wantedGame = $this->game_name ?? \Arr::get($options, 'game_name');
+
         $games = \Config::get('games.supported_games', []);
 
         if(!in_array($wantedGame, $games, true)) {
