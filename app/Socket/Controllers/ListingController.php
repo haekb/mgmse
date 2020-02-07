@@ -38,7 +38,7 @@ class ListingController extends CommonController
      */
     public function onError(Exception $e): void
     {
-        Log::info("Client recieved error {$e->getMessage()}");
+        Log::info("Client received error {$e->getMessage()}");
     }
 
     /**

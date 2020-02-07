@@ -78,7 +78,7 @@ abstract class CommonController
                     $i--;
                     continue;
                 }
-                $key   = $request_array[$i];
+                $key   = strtolower($request_array[$i]);
                 $value = $request_array[$i + 1] ?? null;
 
                 \Arr::set($query, "{$index}.{$key}", $value);
