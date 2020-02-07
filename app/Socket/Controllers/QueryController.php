@@ -146,7 +146,7 @@ class QueryController extends CommonController
      * @param $response
      * @return string
      */
-    protected function handleListUnreal($query, $response)
+    protected function handleListUnreal($query, $response): string
     {
         $gameName = Arr::get($query, 'gamename');
         $servers  = (new Server())->findAllInCache($gameName);
@@ -167,7 +167,7 @@ class QueryController extends CommonController
      * @param $response
      * @return string
      */
-    protected function handleListLithtech($query, $response)
+    protected function handleListLithtech($query, $response): string
     {
         $gameName = Arr::get($query, 'gamename');
         $servers  = (new Server())->findAllInCache($gameName);

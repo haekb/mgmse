@@ -48,11 +48,12 @@ class ListingControllerTest extends TestCase
 
         $listingController = new ListingController($connection);
 
-        $query = "\\echo\\hello world";
+        $query = "\\echo\\hello world\\final\\";
 
         $listingController->onData($query, '127.0.0.1:1234');
-        $this->assertNotEmpty($connection->getData());
-        $this->assertEquals($query, $connection->getData());
+        $data = $connection->getData();
+        $this->assertNotEmpty($data);
+        $this->assertEquals($query, $data);
     }
 
     /**
@@ -74,10 +75,12 @@ class ListingControllerTest extends TestCase
         $this->assertNotEmpty($data);
 
         // Because we don't have a server with that address, we need more info
-        $this->assertEquals("\\status\\", $data);
+        $this->assertEquals("\\status\\\\final\\", $data);
     }
 
     /**
+     * Note: We now call statechange on every heartbeat. The test has been updated to represent this.
+     * --
      * Test out a heartbeat with no "statechange" query
      * We have a server in cache,
      * so all we're doing here is updating the timestamp so it doesn't get removed in 5 minutes.
@@ -99,7 +102,7 @@ class ListingControllerTest extends TestCase
         $data = $socket->getData();
 
         // No update
-        $this->assertEmpty($data);
+        $this->assertEquals('\\status\\\\final\\', $data);
     }
 
     public function testOnDataHeartbeatStateChanged(): void
@@ -121,7 +124,7 @@ class ListingControllerTest extends TestCase
         $this->assertNotEmpty($data);
 
         // They requested a statechange, we need more info
-        $this->assertEquals("\\status\\", $data);
+        $this->assertEquals("\\status\\\\final\\", $data);
     }
 
     public function testOnDataPublish(): void
@@ -211,12 +214,10 @@ class ListingControllerTest extends TestCase
         for ($i = 0; $i < 5; $i++) {
             $localQuery = "\\heartbeat\\27888\\gamename\\nolf2\\final\\\\queryid\\{$i}.1";
             $listingServer->onData($localQuery, $serverAddress);
+
+            $data = $socket->getData();
+            $this->assertEquals('\\status\\\\final\\', $data);
         }
-
-        $data = $socket->getData();
-
-        // No response
-        $this->assertEmpty($data);
 
         $servers = (new Server())->findAllInCache($gameName);
 

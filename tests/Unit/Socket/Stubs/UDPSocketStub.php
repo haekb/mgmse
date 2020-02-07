@@ -58,7 +58,12 @@ class UDPSocketStub extends EventEmitter implements SocketInterface
 
     public function getData()
     {
-        return $this->data;
+        $data = $this->data;
+
+        // Clear the buffer;
+        $this->data = '';
+
+        return $data;
     }
 
     public function getRemoteAddress()

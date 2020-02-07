@@ -107,13 +107,13 @@
 
             For the sole purpose of creating web widgets to display multi-player server statuses, this information may also be shared with individuals through Application Programming Interface ("API") access.
 
-            If you have concerns about third party processing of your data, please refer to the <b>Restricting Third Party Data Processing</b> section.
+            If you have any concerns about third party processing of your data, please refer to the <b>Restricting Third Party Data Processing</b> section.
         </p>
         <div class="sub-title">
             How Do You Store My Data?
         </div>
         <p>
-            For the duration of your multi-player server and 10 minutes after you discontinue the multi-player server we store the data in memory.
+            For the duration of your multi-player server and for 10 minutes after you discontinue the multi-player server we store the data in memory. After such time the data is removed automatically.
 
             Non-unique data will be stored as long as you're on a multi-player server.
 
@@ -121,7 +121,7 @@
 
             Individuals with Application Programming Interface ("API") access may hold your data for longer.
 
-            If you have any concerns about third party processing, please refer to the <b>Restricting Third Party Data Processing</b> section.
+            If you have any concerns about third party processing of your data, please refer to the <b>Restricting Third Party Data Processing</b> section.
         </p>
         <div class="sub-title">
             Restricting Third Party Data Processing

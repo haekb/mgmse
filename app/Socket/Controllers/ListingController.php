@@ -119,11 +119,13 @@ class ListingController extends CommonController
             $server->updateInCache($serverAddress, $server->toArray());
         }
 
-        // If we don't have a server by them, or if something changed on their end, mark it down that we need to poke them
-        if (!$server || $stateChanged) {
-            // Ask for more info!
-            $response .= '\\status\\';
+        // While normally we'd wait for a state change, some games don't seem to request one.
+        // So let's always ask for status on every heartbeat.
+        $response .= '\\status\\';
 
+        // If we don't have a server by them
+        if (!$server)
+        {
             Log::info("Requested updated server info from {$serverAddress}");
 
             // Not all games support \\status\\ request directly from the master server (lol, Unreal Engine 1 games)
@@ -143,14 +145,6 @@ class ListingController extends CommonController
 
     protected function handlePublish($query, $serverAddress): bool
     {
-        $gameName = Arr::get($query, 'gamename');
-
-        try {
-            $server = (new Server())->findInCache($serverAddress, $gameName);
-        } catch (\RuntimeException $e) {
-            $server = null;
-        }
-
         $exclude_for_options = [
             'hostname',
             'hostip',
@@ -169,9 +163,10 @@ class ListingController extends CommonController
         $server->game_name    = Arr::get($query, 'gamename');
         $server->game_version = Arr::get($query, 'gamever');
 
+        // Filter the options we already stored above
         $options = array_filter($query, function ($item) use ($exclude_for_options) {
             return !in_array($item, $exclude_for_options, true);
-        });
+        }, ARRAY_FILTER_USE_KEY );
 
         $server->options = $options;
 
