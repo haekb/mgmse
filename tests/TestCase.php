@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Models\Server;
 use Artisan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -15,6 +16,10 @@ abstract class TestCase extends BaseTestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        // Before each test, clear the test cache!
+        $cache_key = (new Server())->getCacheKey().'.nolf2';
+        \RedisManager::del($cache_key);
     }
 
     public function tearDown(): void

@@ -11,5 +11,5 @@
 |
 */
 // Brought this back! Just shows the project's github.
-Route::get('/', 'Controller@index');
-Route::get('/privacy', 'Controller@privacy');
+Route::get('/', 'WebController@index');
+Route::get('/privacy', 'WebController@privacy');
