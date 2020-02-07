@@ -10,3 +10,10 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+// Brought this back! Just shows the project's github.
+Route::get('/', function () {
+    return view('welcome');
+});
+Route::get('/privacy', function () {
+    return view('privacy');
+});

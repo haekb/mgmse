@@ -39,7 +39,7 @@ class Server extends Model
     public const STATUS_CLOSED = 'exiting';
 
     private const CACHE_KEY = 'models.servers';
-    private const CACHE_TTL = 5; // Minutes
+    private const CACHE_TTL = 10; // Minutes
 
     /**
      * The attributes that are mass assignable.

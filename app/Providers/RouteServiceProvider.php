@@ -49,7 +49,7 @@ class RouteServiceProvider extends ServiceProvider
         }
 
         // We don't need web routes...yet.
-        // $this->mapWebRoutes();
+        $this->mapWebRoutes();
     }
 
     /**
