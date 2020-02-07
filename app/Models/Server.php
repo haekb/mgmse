@@ -38,6 +38,8 @@ class Server extends Model
     public const STATUS_OPEN   = 'openplaying';
     public const STATUS_CLOSED = 'exiting';
 
+    public const NO_TRACK_NAME = '[NT]';
+
     private const CACHE_KEY = 'models.servers';
     private const CACHE_TTL = 10; // Minutes
 

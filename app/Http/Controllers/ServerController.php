@@ -12,6 +12,11 @@ class ServerController extends Controller
 
     public function index(Request $request)
     {
+        $json_api_key = \Config::get('features.json_api_key');
+        if($json_api_key && $request->get('password') !== $json_api_key) {
+            abort(400);
+        }
+
         $gameName = $request->get('gameName');
 
         if(!$gameName) {
@@ -20,10 +25,16 @@ class ServerController extends Controller
 
         $cache_key = self::CACHE_KEY . $gameName;
 
-        $servers = \Cache::get($cache_key, null);
+        $servers = null;//\Cache::get($cache_key, null);
 
         if(!$servers) {
             $servers = (new Server())->findAllInCache($gameName);
+
+            // Filter any NO TRACK servers
+            $servers = $servers->filter(function ($server) {
+                return strpos($server->name, Server::NO_TRACK_NAME) === false;
+            });
+
             \Cache::put($cache_key, $servers, self::CACHE_TTL);
         }
 
