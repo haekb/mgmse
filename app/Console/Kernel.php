@@ -26,6 +26,8 @@ class Kernel extends ConsoleKernel
     {
         // Schedule our cleaner command
         $schedule->command('clean:expired-servers')->everyMinute();
+        $schedule->command('announce:new-day')->daily();
+
     }
 
     /**
