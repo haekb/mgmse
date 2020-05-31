@@ -18,10 +18,12 @@ class ListingController extends CommonController
     ];
 
     protected SocketInterface $connection;
+    protected string $hashedAddress;
 
     public function __construct(SocketInterface $connection)
     {
         $this->connection = $connection;
+        $this->hashedAddress = \Hash::make($connection->getRemoteAddress());
     }
 
     /**
@@ -29,7 +31,7 @@ class ListingController extends CommonController
      */
     public function onConnected(): void
     {
-        Log::info("Client {$this->connection->getRemoteAddress()} connected");
+        Log::info("Client {$this->hashedAddress} connected");
     }
 
     /**
@@ -54,7 +56,7 @@ class ListingController extends CommonController
      */
     public function onEnded(): void
     {
-        Log::info("Client {$this->connection->getRemoteAddress()} ended their connection");
+        Log::info("Client {$this->hashedAddress} ended their connection");
     }
 
     /**

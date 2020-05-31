@@ -17,6 +17,7 @@ use React\Socket\ConnectionInterface;
  * @package App\Socket\Controllers
  * @property array               $client
  * @property ConnectionInterface $connection
+ * @property string              $hashedAddress
  */
 class QueryController extends CommonController
 {
@@ -26,10 +27,12 @@ class QueryController extends CommonController
     ];
 
     protected ConnectionInterface $connection;
+    protected string $hashedAddress;
 
     public function __construct(ConnectionInterface $connection)
     {
         $this->connection = $connection;
+        $this->hashedAddress = \Hash::make($connection->getRemoteAddress());
     }
 
     /**
@@ -37,7 +40,7 @@ class QueryController extends CommonController
      */
     public function onConnected(): void
     {
-        Log::info("Client {$this->connection->getRemoteAddress()} connected. Sending initial request.");
+        Log::info("Client {$this->hashedAddress} connected. Sending initial request.");
 
         // Ask for validation!
         $this->connection->write('\\basic\\\\secure\\final\\');
@@ -65,7 +68,7 @@ class QueryController extends CommonController
      */
     public function onEnded(): void
     {
-        Log::info("Client {$this->connection->getRemoteAddress()} ended their connection");
+        Log::info("Client {$this->hashedAddress} ended their connection");
     }
 
     /**
@@ -74,7 +77,7 @@ class QueryController extends CommonController
      */
     public function onData(string $message): void
     {
-        Log::info("Received data from client {$this->connection->getRemoteAddress()}");
+        Log::info("Received data from client {$this->hashedAddress}");
         Log::debug("DATA: {$message}");
 
 
@@ -109,7 +112,7 @@ class QueryController extends CommonController
             $response = $security.$response."\\final\\";
         }
 
-        Log::info("Sent client {$this->connection->getRemoteAddress()}: {$response}");
+        Log::info("Sent client {$this->hashedAddress}: {$response}");
 
         $sent = $this->connection->write($response);
     }
