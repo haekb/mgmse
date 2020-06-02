@@ -27,6 +27,11 @@ class Game extends Model
 
     public function save(array $options = [])
     {
+        if (\App::runningUnitTests())
+        {
+            return parent::save($options);
+        }
+
         $wantedGame = $this->game_name ?? \Arr::get($options, 'game_name');
 
         $games = \Config::get('games.supported_games', []);
