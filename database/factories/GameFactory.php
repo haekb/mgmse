@@ -9,5 +9,6 @@ $factory->define(\App\Models\Game::class, function (Faker $faker) {
     return [
         'game_name'    => $faker->bs,
         'server_count' => 0,
+        'version'      => '1.0',
     ];
 });

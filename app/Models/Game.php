@@ -23,6 +23,7 @@ class Game extends Model
     protected $fillable = [
         'game_name',
         'server_count',
+        'version',
     ];
 
     public function save(array $options = [])
