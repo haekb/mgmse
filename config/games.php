@@ -14,5 +14,8 @@ return [
         'nolf',
         'nolf2',
         'deusex',
+
+        // Special system game, only used for server maintenance motd
+        'system',
     ]
 ];
