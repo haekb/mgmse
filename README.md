@@ -1,8 +1,10 @@
-# mgmse - Modern GameSpy Master Server Emulator
-This is a small Laravel project that mimics a GameSpy v1 master server. I'm sorry I couldn't think of a better name!
+# mgmse - Modern Game Master Server Emulator
+Originally this platform was meant to emulate GameSpy v1 master servers. However additional features needed adding, and 
+it eventually grew past that original goal. It can still handle basic GameSpy query/publishing services, 
+but everything else is custom built.
 
 ## Requirements
- - Redis (Memurai works well on Windows!)
+ - Redis
  - PHP 7.4
  - postgres (You shouldn't need this, since we don't store anything in the DB yet, but Laravel will probably complain.)
  - Nginx (If you've enabled the json api feature)
