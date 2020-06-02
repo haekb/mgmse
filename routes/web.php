@@ -13,3 +13,4 @@
 // Brought this back! Just shows the project's github.
 Route::get('/', 'WebController@index');
 Route::get('/privacy', 'WebController@privacy');
+Route::get('/{game_id}/motd', 'WebController@motd');
