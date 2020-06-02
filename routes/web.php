@@ -14,3 +14,4 @@
 Route::get('/', 'WebController@index');
 Route::get('/privacy', 'WebController@privacy');
 Route::get('/{game_id}/motd', 'WebController@motd');
+Route::get('/{game_id}/version', 'WebController@version');
