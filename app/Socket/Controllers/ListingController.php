@@ -22,7 +22,7 @@ class ListingController extends CommonController
 
     public function __construct(SocketInterface $connection)
     {
-        $this->connection = $connection;
+        $this->connection    = $connection;
         $this->hashedAddress = \Hash::make($connection->getRemoteAddress());
     }
 
@@ -109,8 +109,10 @@ class ListingController extends CommonController
 
         $gameName = Arr::get($query, 'gamename');
 
+        $host_address = $this->getHostAddress($query, $serverAddress);
+
         try {
-            $server = (new Server())->findInCache($serverAddress, $gameName);
+            $server = (new Server())->findInCache($host_address, $gameName);
         } catch (\RuntimeException $e) {
             $server = null;
         }
@@ -118,7 +120,7 @@ class ListingController extends CommonController
         // Update the time, and update the cache
         if ($server) {
             $server->setUpdatedAt(now());
-            $server->updateInCache($serverAddress, $server->toArray());
+            $server->updateInCache($host_address, $server->toArray());
         }
 
         // While normally we'd wait for a state change, some games don't seem to request one.
@@ -126,8 +128,7 @@ class ListingController extends CommonController
         $response .= '\\status\\';
 
         // If we don't have a server by them
-        if (!$server)
-        {
+        if (!$server) {
             Log::info("Requested updated server info from {$serverAddress}");
 
             // Not all games support \\status\\ request directly from the master server (lol, Unreal Engine 1 games)
@@ -157,17 +158,9 @@ class ListingController extends CommonController
             'gamemode',
         ];
 
-        // Some games don't pass over the hostip, so default to the server trying to talk to us!
-        $hostAddress = $serverAddress;
-
-        // But some do. So if it's there, let's use it!
-        if (isset($query['hostport'])) {
-            $hostAddress = Arr::get($query, 'hostip', $serverAddress).':'.Arr::get($query, 'hostport');
-        }
-
         $server          = new Server();
         $server->name    = Arr::get($query, 'hostname');
-        $server->address = $hostAddress;
+        $server->address = $this->getHostAddress($query, $serverAddress);
 
         $server->has_password = (bool) Arr::get($query, 'password', 0);
         $server->game_name    = Arr::get($query, 'gamename');
@@ -183,6 +176,19 @@ class ListingController extends CommonController
         $serverArray = $server->toArray();
 
         return $server->updateInCache($serverAddress, $serverArray);
+    }
+
+    private function getHostAddress($query, $serverAddress)
+    {
+        // Some games don't pass over the hostip, so default to the server trying to talk to us!
+        $hostAddress = $serverAddress;
+
+        // But some do. So if it's there, let's use it!
+        if (isset($query['hostport'])) {
+            $hostAddress = Arr::get($query, 'hostip', $serverAddress).':'.Arr::get($query, 'hostport');
+        }
+
+        return $hostAddress;
     }
 
 }
