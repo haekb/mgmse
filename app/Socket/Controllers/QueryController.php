@@ -176,6 +176,12 @@ class QueryController extends CommonController
         $servers  = (new Server())->findAllInCache($gameName);
 
         foreach ($servers as $server) {
+            // Skip this for now
+            if ($server->name === 'Not Available')
+            {
+                continue;
+            }
+
             $arr = explode(':', $server->address);
             // Shove the ip address in, and make the port big endian
             $processed_server = [$this->packIP($arr[0]), pack('n', $arr[1])];

@@ -35,6 +35,11 @@ class ServerController extends Controller
                 return strpos($server->name, Server::NO_TRACK_NAME) === false;
             });
 
+            // Filter any "Not Available"
+            $servers = $servers->filter(function ($server) {
+                return !($server->name === 'Not Available');
+            });
+
             \Cache::put($cache_key, $servers, self::CACHE_TTL);
         }
 
