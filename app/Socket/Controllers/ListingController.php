@@ -157,9 +157,17 @@ class ListingController extends CommonController
             'gamemode',
         ];
 
+        // Some games don't pass over the hostip, so default to the server trying to talk to us!
+        $hostAddress = $serverAddress;
+
+        // But some do. So if it's there, let's use it!
+        if (isset($query['hostport'])) {
+            $hostAddress = Arr::get($query, 'hostip', $serverAddress).':'.Arr::get($query, 'hostport');
+        }
+
         $server          = new Server();
         $server->name    = Arr::get($query, 'hostname');
-        $server->address = $serverAddress;
+        $server->address = $hostAddress;
 
         $server->has_password = (bool) Arr::get($query, 'password', 0);
         $server->game_name    = Arr::get($query, 'gamename');
@@ -168,7 +176,7 @@ class ListingController extends CommonController
         // Filter the options we already stored above
         $options = array_filter($query, function ($item) use ($exclude_for_options) {
             return !in_array($item, $exclude_for_options, true);
-        }, ARRAY_FILTER_USE_KEY );
+        }, ARRAY_FILTER_USE_KEY);
 
         $server->options = $options;
 
