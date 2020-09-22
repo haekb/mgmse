@@ -109,10 +109,10 @@ class ListingController extends CommonController
 
         $gameName = Arr::get($query, 'gamename');
 
-        $host_address = $this->getHostAddress($query, $serverAddress);
+        $hostAddress = $this->getHostAddress($query, $serverAddress);
 
         try {
-            $server = (new Server())->findInCache($host_address, $gameName);
+            $server = (new Server())->findInCache($hostAddress, $gameName);
         } catch (\RuntimeException $e) {
             $server = null;
         }
@@ -120,7 +120,7 @@ class ListingController extends CommonController
         // Update the time, and update the cache
         if ($server) {
             $server->setUpdatedAt(now());
-            $server->updateInCache($host_address, $server->toArray());
+            $server->updateInCache($hostAddress, $server->toArray());
         }
 
         // While normally we'd wait for a state change, some games don't seem to request one.
@@ -158,9 +158,11 @@ class ListingController extends CommonController
             'gamemode',
         ];
 
+        $hostAddress = $this->getHostAddress($query, $serverAddress);
+
         $server          = new Server();
         $server->name    = Arr::get($query, 'hostname');
-        $server->address = $this->getHostAddress($query, $serverAddress);
+        $server->address = $hostAddress;
 
         $server->has_password = (bool) Arr::get($query, 'password', 0);
         $server->game_name    = Arr::get($query, 'gamename');
@@ -175,7 +177,7 @@ class ListingController extends CommonController
 
         $serverArray = $server->toArray();
 
-        return $server->updateInCache($serverAddress, $serverArray);
+        return $server->updateInCache($hostAddress, $serverArray);
     }
 
     private function getHostAddress($query, $serverAddress)
@@ -184,8 +186,8 @@ class ListingController extends CommonController
         $hostAddress = $serverAddress;
 
         // But some do. So if it's there, let's use it!
-        if (isset($query['hostport'])) {
-            $hostAddress = Arr::get($query, 'hostip', $serverAddress).':'.Arr::get($query, 'hostport');
+        if (isset($query['hostip'], $query['hostport'])) {
+            $hostAddress = Arr::get($query, 'hostip').':'.Arr::get($query, 'hostport');
         }
 
         return $hostAddress;
