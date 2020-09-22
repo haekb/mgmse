@@ -187,7 +187,16 @@ class ListingController extends CommonController
 
         // But some do. So if it's there, let's use it!
         if (isset($query['hostip'], $query['hostport'])) {
-            $hostAddress = Arr::get($query, 'hostip').':'.Arr::get($query, 'hostport');
+            $ip = Arr::get($query, 'hostip');
+            $port = Arr::get($query, 'hostport');
+
+            // Okay...some games give us the lan ip...parse the real ip from our request
+            if (\Str::contains($ip, '192.168.'))
+            {
+                $ip = Arr::first(explode(':', $serverAddress));
+            }
+
+            $hostAddress = "{$ip}:{$port}";
         }
 
         return $hostAddress;
