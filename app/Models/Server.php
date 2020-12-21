@@ -160,10 +160,12 @@ class Server extends Model
         $servers     = $this->findAllInCache($gameName);
         $cache       = null;
         $serverIndex = -1;
+        $decoded_server = [];
 
         foreach ($servers as $index => $server) {
             try {
                 $decoded_server = json_decode($server, true, 512, JSON_THROW_ON_ERROR);
+
             } catch (\ErrorException $e) {
                 continue;
             }
@@ -175,7 +177,8 @@ class Server extends Model
             }
         }
 
-        if (!isset($options['created_at'])) {
+        // Make sure created_at is not modified
+        if (!isset($decoded_server['created_at'])) {
             $options['created_at'] = Carbon::now();
         }
 
