@@ -180,6 +180,8 @@ class Server extends Model
         // Make sure created_at is not modified
         if (!isset($decoded_server['created_at'])) {
             $options['created_at'] = Carbon::now();
+        } else {
+            $options['created_at'] = $decoded_server['created_at'];
         }
 
         if (!isset($options['updated_at'])) {
